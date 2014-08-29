@@ -20,11 +20,13 @@ public class SKPredicter {
 		
 	}
 	
-	public LinkedList<Prediction> predict(String context, String curWord) throws IOException {
+	public LinkedList<Prediction> predict(String context, String curWord) throws IOException {		
+		context = context.replaceAll("\n", "");
+		curWord = curWord.replaceAll("\n", "");
 		System.out.println(context);
 		System.out.println(curWord);
 		
-		System.out.println("http://172.16.17.207:9005/predict?json=" + "{\"context\":\"" + context + "\",\"lm-code\" : [\"en_FRY\", \"en_GB\"], \"currentword\":\"" + curWord + "\"}");
+		System.out.println("http://172.16.17.207:9005/predict?json={\"context\":\"" + (context.equals("^") ? "^" : URLEncoder.encode(context)) + "\",\"lm-code\" : [\"en_FRY\", \"en_GB\"], \"currentword\":\"" + URLEncoder.encode(curWord) + "\"}");
 		
 		URL api = new URL("http://172.16.17.207:9005/predict?json=" + URLEncoder.encode("{\"context\":\"" + context + "\",\"lm-code\" : [\"en_FRY\", \"en_GB\"], \"currentword\":\"" + curWord + "\"}"));
         URLConnection yc = api.openConnection();
@@ -40,6 +42,7 @@ public class SKPredicter {
     	
     	for(int i = 0; i < predictions.size(); i++) {
     		JSONObject prediction = (JSONObject) predictions.get(i);
+    		if(((String) prediction.get("term")).equals(curWord)) continue;
     		predArray.add(new Prediction((String) prediction.get("term"), (Double) prediction.get("prob")));
 //    		System.out.println("Prediction: " + prediction.get("term") + " " + prediction.get("prob"));
     	}
